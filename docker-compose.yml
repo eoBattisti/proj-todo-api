@@ -1,22 +1,30 @@
 version: '3.3'
 services:
   redis:
+    container_name: todo_redis
+    restart: always
     image: redis
     command: redis-server
     ports:
       - "14000:6379"
 
   db:
+    container_name: todo_db
+    restart: always
     image: postgres
     volumes:
-      - ./data/db:/var/lib/postgresql/data
+      - data-volume:/var/lib/postgresql/data
     environment:
       - POSTGRES_NAME=root
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=root
 
-  web:
-    build: .
+  todo:
+    container_name: todo_api
+    build:
+      context: .
+      args:
+        - MODE=development
     restart: always
     command: python manage.py runserver 0.0.0.0:9000
     env_file:
@@ -24,14 +32,18 @@ services:
     ports:
       - "127.0.0.1:9000:9000"
     volumes:
-      - .:/code
+      - ./data/db:/code
     environment:
       - POSTGRES_NAME=root
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=root
+      - MODE=development
     links:
       - db
       - redis
     depends_on:
       - db
       - redis
+
+volumes:
+    data-volume:

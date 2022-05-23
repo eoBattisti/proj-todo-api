@@ -14,7 +14,9 @@ COPY docker/start.sh /setup//
 COPY docker/requirements/. /setup/
 COPY docker/entrypoint.sh /
 
-RUN pip install -r main.txt
+ARG MODE
+
+ENV MODE $MODE
 
 RUN sh start.sh
 
